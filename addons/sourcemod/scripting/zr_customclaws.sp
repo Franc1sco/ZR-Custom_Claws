@@ -5,7 +5,7 @@
 #include <cstrike>
 #include <sdkhooks>  
 
-#define DATA "1.0"
+#define DATA "1.1"
 
 public Plugin:myinfo =
 {
@@ -27,31 +27,22 @@ public OnPluginStart()
 {
 	trie_classes = CreateTrie();
 	
+	HookEvent("player_spawn", OnSpawn);
+	
 	CreateConVar("sm_customclaws_version", DATA, "", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
 	
 	for(new i = 1; i <= MaxClients; i++)
 		if(IsClientInGame(i)) OnClientPutInServer(i);
 }
 
-/*  public Action:OnSpawn(Handle:event, const String:name[], bool:dontBroadcast) 
+public Action:OnSpawn(Handle:event, const String:name[], bool:dontBroadcast) 
 {
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
 	g_PVMid[client] = Weapon_GetViewModelIndex(client, -1); 
-} */
-
-public ZR_OnClientInfected(client, attacker, bool:motherInfect, bool:respawnOverride, bool:respawn)
-{
-	Arms(client);
-}
-
-public ZR_OnClientHumanPost(client, bool:respawn, bool:protect)
-{
-	Arms(client);
-}
+} 
 
 Arms(client)
 {
-	g_PVMid[client] = Weapon_GetViewModelIndex(client, -1);
 	new cindex = ZR_GetActiveClass(client);
 	//PrintToChat(client, "paso1");
 	if(!ZR_IsValidClassIndex(cindex)) return;
