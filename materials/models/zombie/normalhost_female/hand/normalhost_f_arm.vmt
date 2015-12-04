@@ -1,0 +1,34 @@
+
+"VertexLitGeneric"
+{
+	"$basetexture"		"models\Zombie\normalhost_female\normalhost_f_arm"
+	"$bumpmap"		"models\Zombie\normalhost_female\normalhost_f_arm_normal"
+	"$envmap"		"env_cubemap"
+	"$envmaptint"		"[ 0.200000 0.200000 0.200000 ]"
+	"$envmapcontrast"	0.250000
+	"$envmapsaturation"	0.100000
+	"$envmapboost"		0.25000
+	"$phongexponent"	6.000000
+	"$phongboost"		0.60000
+	"$phong"		1
+	"$bumpscale"		1.000000
+
+	"$rimlight"		1
+	"$rimlightexponent"	2.000000
+	"$rimlightboost"	0.2000000
+	"$rimlightcolorblend"	1.0
+	"$rimmask"		0
+
+
+	"$normalmapalphaenvmapmask" 1
+	"$specularmask" "255"
+        "$diffusecontrast"  0.25
+
+	 //$translucent  1
+	 //$nocull 1
+	 //$alphatest 1
+	 //$ALPHATESTREFERENCE	0.1
+
+	$ShadowSilouette	0
+
+}
