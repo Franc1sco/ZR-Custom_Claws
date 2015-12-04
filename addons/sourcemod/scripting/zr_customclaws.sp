@@ -79,7 +79,7 @@ public Action OnPostWeaponEquip(int client, int weapon)
 	if (GetEntProp(weapon, Prop_Send, "m_hPrevOwner") > 0)
 		return;
 		
-		
+	// remove paints if client will have custom claws
 	if(IsPlayerAlive(client) && ZR_IsClientZombie(client))
 	{
 		SetEntProp(weapon,Prop_Send,"m_iItemIDLow",-1);
@@ -112,16 +112,21 @@ public OnAllPluginsLoaded()
 public OnClassPathChange(Handle:convar, const String:oldValue[], const String:newValue[])
 {
 	strcopy(sClassPath, sizeof(sClassPath), newValue);
-	OnConfigsExecuted();
+	OnMapStart();
 }
 
-public OnConfigsExecuted()
+public OnMapStart()
 {
-	CreateTimer(0.2, Loading, _, TIMER_FLAG_NO_MAPCHANGE);
-}
-
-public Action:Loading(Handle:timer)
-{
+	PrecacheModel("models/zombie/normal_f/hand/hand_zombie_normal_f_ani.mdl");
+	PrecacheModel("models/zombie/normalhost_female/hand/hand_zombie_normalhost_f_ani.mdl");	
+	PrecacheModel("models/zombie/normal/hand/hand_zombie_normal_ani.mdl");
+	PrecacheModel("models/zombie/normalhost/hand/hand_zombie_normalhost_ani.mdl");
+	
+	AddFileToDownloadsTable("models/zombie/normal_f/hand/hand_zombie_normal_f_ani.mdl");
+	AddFileToDownloadsTable("models/zombie/normalhost_female/hand/hand_zombie_normalhost_f_ani.mdl");	
+	AddFileToDownloadsTable("models/zombie/normal/hand/hand_zombie_normal_ani.mdl");
+	AddFileToDownloadsTable("models/zombie/normalhost/hand/hand_zombie_normalhost_ani.mdl");
+	
 	if (kv != INVALID_HANDLE)
 	{
 		CloseHandle(kv);
@@ -152,7 +157,7 @@ public Action:Loading(Handle:timer)
 			{
 				index = PrecacheModel(model);
 				SetTrieValue(trie_classes, model, index);
-				PrintToServer("Loaded model %s with index %i", index);
+				PrintToServer("Loaded model %s with index %i", model, index);
 			}
 			
 		} while (KvGotoNextKey(kv));
