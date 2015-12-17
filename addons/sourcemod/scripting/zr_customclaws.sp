@@ -5,7 +5,7 @@
 #include <cstrike>
 #include <sdkhooks>  
 
-#define DATA "1.0"
+#define DATA "1.2"
 
 public Plugin:myinfo =
 {
@@ -27,31 +27,22 @@ public OnPluginStart()
 {
 	trie_classes = CreateTrie();
 	
+	HookEvent("player_spawn", OnSpawn);
+	
 	CreateConVar("sm_customclaws_version", DATA, "", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
 	
 	for(new i = 1; i <= MaxClients; i++)
 		if(IsClientInGame(i)) OnClientPutInServer(i);
 }
 
-/*  public Action:OnSpawn(Handle:event, const String:name[], bool:dontBroadcast) 
+public Action:OnSpawn(Handle:event, const String:name[], bool:dontBroadcast) 
 {
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
 	g_PVMid[client] = Weapon_GetViewModelIndex(client, -1); 
-} */
-
-public ZR_OnClientInfected(client, attacker, bool:motherInfect, bool:respawnOverride, bool:respawn)
-{
-	Arms(client);
-}
-
-public ZR_OnClientHumanPost(client, bool:respawn, bool:protect)
-{
-	Arms(client);
-}
+} 
 
 Arms(client)
 {
-	g_PVMid[client] = Weapon_GetViewModelIndex(client, -1);
 	new cindex = ZR_GetActiveClass(client);
 	//PrintToChat(client, "paso1");
 	if(!ZR_IsValidClassIndex(cindex)) return;
@@ -67,35 +58,22 @@ Arms(client)
 	//PrintToChat(client, "paso3");
 	new wpnid = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon"); 
 	if(wpnid < 1) return;
+	SetEntProp(wpnid, Prop_Send, "m_iItemIDLow", 0);
+	SetEntProp(wpnid, Prop_Send, "m_iItemIDHigh", 0);
+	
 	SetEntProp(wpnid, Prop_Send, "m_nModelIndex", 0); 
-	SetEntProp(g_PVMid[client], Prop_Send, "m_nModelIndex", index); 
 		
 	//PrintToChat(client, "index es %i", index);
 	int iWorldModel = GetEntPropEnt(wpnid, Prop_Send, "m_hWeaponWorldModel"); 
 	if(IsValidEdict(iWorldModel)) SetEntProp(iWorldModel, Prop_Send, "m_nModelIndex", 0); 
+	
+	SetEntProp(g_PVMid[client], Prop_Send, "m_nModelIndex", index); 
 }
 
 public void OnClientPutInServer(int client)
 { 
 	SDKHook(client, SDKHook_WeaponSwitchPost, OnClientWeaponSwitchPost);  
-	if(!IsFakeClient(client)) SDKHook(client, SDKHook_WeaponEquipPost, OnPostWeaponEquip);
 } 
-
-public Action OnPostWeaponEquip(int client, int weapon)
-{
-	if(weapon < 1 || !IsValidEdict(weapon) || !IsValidEntity(weapon)) return;
-	
-	if (GetEntProp(weapon, Prop_Send, "m_hPrevOwner") > 0)
-		return;
-		
-		
-	if(IsPlayerAlive(client) && ZR_IsClientZombie(client))
-	{
-		SetEntProp(weapon,Prop_Send,"m_iItemIDLow",-1);
-
-		SetEntProp(weapon,Prop_Send,"m_nFallbackPaintKit",-1);
-	}
-}
 
 public void OnClientWeaponSwitchPost(int client, int wpnid) 
 { 
@@ -121,16 +99,21 @@ public OnAllPluginsLoaded()
 public OnClassPathChange(Handle:convar, const String:oldValue[], const String:newValue[])
 {
 	strcopy(sClassPath, sizeof(sClassPath), newValue);
-	OnConfigsExecuted();
+	OnMapStart();
 }
 
-public OnConfigsExecuted()
+public OnMapStart()
 {
-	CreateTimer(0.2, Loading, _, TIMER_FLAG_NO_MAPCHANGE);
-}
-
-public Action:Loading(Handle:timer)
-{
+	PrecacheModel("models/zombie/normal_f/hand/hand_zombie_normal_f_ani.mdl");
+	PrecacheModel("models/zombie/normalhost_female/hand/hand_zombie_normalhost_f_ani.mdl");	
+	PrecacheModel("models/zombie/normal/hand/hand_zombie_normal_ani.mdl");
+	PrecacheModel("models/zombie/normalhost/hand/hand_zombie_normalhost_ani.mdl");
+	
+	AddFileToDownloadsTable("models/zombie/normal_f/hand/hand_zombie_normal_f_ani.mdl");
+	AddFileToDownloadsTable("models/zombie/normalhost_female/hand/hand_zombie_normalhost_f_ani.mdl");	
+	AddFileToDownloadsTable("models/zombie/normal/hand/hand_zombie_normal_ani.mdl");
+	AddFileToDownloadsTable("models/zombie/normalhost/hand/hand_zombie_normalhost_ani.mdl");
+	
 	if (kv != INVALID_HANDLE)
 	{
 		CloseHandle(kv);
@@ -161,7 +144,7 @@ public Action:Loading(Handle:timer)
 			{
 				index = PrecacheModel(model);
 				SetTrieValue(trie_classes, model, index);
-				PrintToServer("Loaded model %s with index %i", index);
+				PrintToServer("Loaded model %s with index %i", model, index);
 			}
 			
 		} while (KvGotoNextKey(kv));
