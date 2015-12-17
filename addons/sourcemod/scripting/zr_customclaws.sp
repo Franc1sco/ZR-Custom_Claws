@@ -5,7 +5,7 @@
 #include <cstrike>
 #include <sdkhooks>  
 
-#define DATA "1.1"
+#define DATA "1.2"
 
 public Plugin:myinfo =
 {
@@ -58,35 +58,22 @@ Arms(client)
 	//PrintToChat(client, "paso3");
 	new wpnid = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon"); 
 	if(wpnid < 1) return;
+	SetEntProp(wpnid, Prop_Send, "m_iItemIDLow", 0);
+	SetEntProp(wpnid, Prop_Send, "m_iItemIDHigh", 0);
+	
 	SetEntProp(wpnid, Prop_Send, "m_nModelIndex", 0); 
-	SetEntProp(g_PVMid[client], Prop_Send, "m_nModelIndex", index); 
 		
 	//PrintToChat(client, "index es %i", index);
 	int iWorldModel = GetEntPropEnt(wpnid, Prop_Send, "m_hWeaponWorldModel"); 
 	if(IsValidEdict(iWorldModel)) SetEntProp(iWorldModel, Prop_Send, "m_nModelIndex", 0); 
+	
+	SetEntProp(g_PVMid[client], Prop_Send, "m_nModelIndex", index); 
 }
 
 public void OnClientPutInServer(int client)
 { 
 	SDKHook(client, SDKHook_WeaponSwitchPost, OnClientWeaponSwitchPost);  
-	if(!IsFakeClient(client)) SDKHook(client, SDKHook_WeaponEquipPost, OnPostWeaponEquip);
 } 
-
-public Action OnPostWeaponEquip(int client, int weapon)
-{
-	if(weapon < 1 || !IsValidEdict(weapon) || !IsValidEntity(weapon)) return;
-	
-	if (GetEntProp(weapon, Prop_Send, "m_hPrevOwner") > 0)
-		return;
-		
-	// remove paints if client will have custom claws
-	if(IsPlayerAlive(client) && ZR_IsClientZombie(client))
-	{
-		SetEntProp(weapon,Prop_Send,"m_iItemIDLow",-1);
-
-		SetEntProp(weapon,Prop_Send,"m_nFallbackPaintKit",-1);
-	}
-}
 
 public void OnClientWeaponSwitchPost(int client, int wpnid) 
 { 
